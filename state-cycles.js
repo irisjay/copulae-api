@@ -39,11 +39,11 @@ var cycle_by_fetch =	function (fetch) {
 							return as_cycler (function (cycle) {
 								var _ = {
 									from:	stream_pushes (function (push) {
-												cycle .to
-													.thru (tap, function (req) {
+												[cycle .to]
+													.forEach (tap (function (req) {
 														fetch (req)
 															.then (push)
-													});
+													}));
 											}),
 									pair:	function (req) {
 												return fetch (req)
@@ -90,9 +90,9 @@ var cycle_from_network =	as_cycler (
 							
 var cycle_by_translate =	function (translate_from, cycler, translate_to) {
 								return	as_cycler (function (cycle) {
-											cycle .to = cycle .to .thru (map, translate_from);
+											cycle .to = [cycle .to] .map (map (translate_from)) [0];
 											var _ =	cycler (cycle);
-											_ .from = _ .from .thru (map, translate_to);
+											_ .from = [_ .from] .map (map (translate_to)) [0];
 											var prior_pair;
 											if (prior_pair = _ .pair)
 												_ .pair =	function (in_) {
@@ -129,20 +129,20 @@ var cycle_persisted =	R .memoize (function (key) {
 								.then (function (value) {
 									if (value !== undefined)
 										begins_with (value, persisting .out)
-								})
-                    		persisting .in
-								.thru (tap, function (_val) {
+								});
+                    		[persisting .in]
+								.forEach (tap (function (_val) {
 									persisting .progress = persisting .progress .then (function () {
 										if (_val === undefined)
 											return localforage .removeItem (prefix_for_persistence + key)
 										else
 											return localforage .setItem (prefix_for_persistence + key, _val)
 									})
-									.catch (report)
+									.catch (window .report)
 									.then (function () {
 									    persisting .out (_val);
 									})
-								});
+								}));
 							return	as_cycler (function (cycle) {
 										return	{
 													init: init,
@@ -152,7 +152,9 @@ var cycle_persisted =	R .memoize (function (key) {
 												        ) .then (function (_) {
 													        _begins_with (_, x);
 													    });
-													    cycle .from .thru (tap, persisting .in) .thru (project, x);
+													    [cycle .from]
+													    	.map (tap (persisting .in)) 
+													    	.forEach (project (x));
 													}),
             										persisting: persisting
 												}
