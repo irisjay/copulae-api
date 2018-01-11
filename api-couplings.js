@@ -94,3 +94,12 @@ var persistence_for =	R .memoizeWith (R .identity) (function (key) {
 							return persisting
 						})
 
+
+var no_errors = R .cond ([
+                    [ R .compose (R .not, R .is (Object)), 
+                    	R .F 
+                	],
+                    [ R .T,
+                    	R .compose (R .not, R .prop ('error'))
+                	]
+                ]);
