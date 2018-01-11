@@ -64,7 +64,7 @@ var restoration =	localforage .keys ()
 						})
 						.catch (R .pipe (
 						    function (x) {setTimeout (function () { throw x }, 0)},
-						    constant ({}))
+						    R .always ({}))
 					    )
 var persistence_for =	R .memoizeWith (R .identity) (function (key) {
 							var persisting =	{
